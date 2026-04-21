@@ -21,7 +21,7 @@ st.markdown("""
 # --- CONFIGURAÇÃO DA API ---
 # No Streamlit Cloud, o ideal é usar st.secrets["API_KEY"]
 # Para testar rápido, você pode manter a string, mas recomendo os Secrets!
-CHAVE_API = "SUA_API_KEY_AQUI" 
+CHAVE_API = "AIzaSyAssF_oqDhTsV6g6GYiqv_YnBziStUyej8" 
 genai.configure(api_key=CHAVE_API)
 
 model = genai.GenerativeModel('gemini-1.5-flash')
