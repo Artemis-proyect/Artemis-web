@@ -55,7 +55,7 @@ if prompt := st.chat_input("Escribe algo..."):
             
             # Usamos el modelo 1.5-Flash que es el balance ideal
             response = client.models.generate_content(
-                model="gemini-1.5-flash", 
+                model = genai.GenerativeModel('gemini-1.5-flash'), 
                 contents=prompt
             )
             
