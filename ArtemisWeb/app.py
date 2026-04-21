@@ -79,7 +79,7 @@ if prompt := st.chat_input("Escribí un comando..."):
             
             # Llamada al modelo Gemini
             response = client.models.generate_content(
-                model="gemini-1.5-flash",
+             model="models/gemini-1.5-flash" ,
                 contents=prompt
             )
             
