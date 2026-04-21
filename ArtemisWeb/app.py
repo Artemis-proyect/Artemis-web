@@ -1,51 +1,76 @@
+import streamlit as st
 import google.generativeai as genai
-import os
 
-# --- CONFIGURAÇÃO DO ARTEMIS ---
-# Substitua 'SUA_API_KEY_AQUI' pela sua chave real do Google AI Studio
-CHAVE_API = "SUA_API_KEY_AQUI"
+# --- CONFIGURAÇÃO DA PÁGINA ---
+st.set_page_config(page_title="Artemis AI", page_icon="🤖", layout="centered")
+
+# Estilo CSS customizado para deixar bonitão
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #0e1117;
+    }
+    .stChatMessage {
+        border-radius: 15px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- CONFIGURAÇÃO DA API ---
+# No Streamlit Cloud, o ideal é usar st.secrets["API_KEY"]
+# Para testar rápido, você pode manter a string, mas recomendo os Secrets!
+CHAVE_API = "SUA_API_KEY_AQUI" 
 genai.configure(api_key=CHAVE_API)
 
-# Configurações de geração (opcional, para deixar as respostas melhores)
-generation_config = {
-  "temperature": 0.7,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens": 1000,
-}
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Inicializando o modelo corretamente
-# Usamos o 'gemini-1.5-flash' que é o mais atual para projetos como o seu
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    generation_config=generation_config
-)
+# --- INICIALIZAÇÃO DO HISTÓRICO ---
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "chat_session" not in st.session_state:
+    st.session_state.chat_session = model.start_chat(history=[])
 
-def iniciar_artemis():
-    # Inicia o histórico do chat vazio
-    chat = model.start_chat(history=[])
-    
-    print("--- ARTEMIS ONLINE ---")
-    print("Pode falar comigo! (Digite 'sair' para encerrar)")
-    print("-----------------------")
+# --- INTERFACE ---
+st.title("🤖 Artemis Project")
+st.subheader("O seu assistente inteligente")
 
-    while True:
-        pergunta = input("Você: ")
+# Barra Lateral (Sidebar)
+with st.sidebar:
+    st.title("Configurações")
+    if st.button("Limpar Conversa"):
+        st.session_state.messages = []
+        st.session_state.chat_session = model.start_chat(history=[])
+        st.rerun()
+    st.write("---")
+    st.write("Versão: 2.0 (Web Edition)")
 
-        if pergunta.lower() in ["sair", "exit", "quit"]:
-            print("Artemis: Falou, meu parceiro! Até a próxima.")
-            break
+# Exibir o histórico de mensagens
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
+# Campo de entrada (Input)
+if prompt := st.chat_input("Diga algo para o Artemis..."):
+    # Mostra a mensagem do usuário
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    # Resposta do Artemis
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+        
         try:
-            # Envia a mensagem para o Gemini
-            response = chat.send_message(pergunta)
+            # Envia para a API
+            response = st.session_state.chat_session.send_message(prompt)
+            full_response = response.text
+            message_placeholder.markdown(full_response)
             
-            # Exibe a resposta do Modo Chat
-            print(f"Artemis: {response.text}")
-            print("-" * 20)
-
+            # Salva no histórico
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            
         except Exception as e:
-            print(f"Ops, deu um erro aqui: {e}")
-
-if __name__ == "__main__":
-    iniciar_artemis()
+            st.error(f"Erro na conexão: {e}")
