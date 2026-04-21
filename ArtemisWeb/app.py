@@ -24,7 +24,7 @@ st.markdown("""
 CHAVE_API = "AIzaSyAssF_oqDhTsV6g6GYiqv_YnBziStUyej8" 
 genai.configure(api_key=CHAVE_API)
 
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 # --- INICIALIZAÇÃO DO HISTÓRICO ---
 if "messages" not in st.session_state:
